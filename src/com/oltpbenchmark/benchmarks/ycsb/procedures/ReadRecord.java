@@ -31,7 +31,7 @@ public class ReadRecord extends Procedure{
         "SELECT * FROM USERTABLE WHERE YCSB_KEY=?"
     );
 
-    public final SQLStmt readStmtStr = new SQLStmt(
+    public final String readStmtStr = new String(
         "SELECT * FROM USERTABLE WHERE YCSB_KEY="
     );
     
