@@ -51,7 +51,7 @@ public class ReadRecord extends Procedure{
 
         for (int iter = 0; iter < iteration; ++iter) {
             Statement stmt = conn.createStatement();
-            ResultSet r = stmt.executeQuery(sql + keyname);
+            ResultSet r = stmt.executeQuery(readStmtStr + keyname);
             while(r.next()) {
                 for (int i = 0; i < YCSBConstants.NUM_FIELDS; i++)
                     results[i] = r.getString(i+1);
