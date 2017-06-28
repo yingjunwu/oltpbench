@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import com.oltpbenchmark.api.Procedure;
 import com.oltpbenchmark.api.SQLStmt;
 import com.oltpbenchmark.benchmarks.ycsb.YCSBConstants;
+import com.oltpbenchmark.benchmarks.ycsb.YCSBProfiler;
 
 public class ReadRecord extends Procedure{
     public final SQLStmt readStmt = new SQLStmt(
@@ -39,26 +40,44 @@ public class ReadRecord extends Procedure{
 
         int iteration = 2;
         
-        for (int iter = 0; iter < iteration; ++iter) {
-            PreparedStatement stmt = this.getPreparedStatement(conn, readStmt);
-            stmt.setInt(1, keyname);
-            ResultSet r = stmt.executeQuery();
-            while(r.next()) {
-                for (int i = 0; i < YCSBConstants.NUM_FIELDS; i++)
-                    results[i] = r.getString(i+1);
-            } // WHILE
-            r.close();
-        }
-
         // for (int iter = 0; iter < iteration; ++iter) {
-        //     Statement stmt = conn.createStatement();
-        //     ResultSet r = stmt.executeQuery(readStmtStr + keyname);
+
+        //     YCSBProfiler.InsertTimePoint("begin prepare");
+        //     PreparedStatement stmt = this.getPreparedStatement(conn, readStmt);
+        //     YCSBProfiler.InsertTimePoint("after prepare");
+
+        //     stmt.setInt(1, keyname);
+            
+        //     YCSBProfiler.InsertTimePoint("begin execute");
+        //     ResultSet r = stmt.executeQuery();
+        //     YCSBProfiler.InsertTimePoint("after execute");
         //     while(r.next()) {
         //         for (int i = 0; i < YCSBConstants.NUM_FIELDS; i++)
         //             results[i] = r.getString(i+1);
         //     } // WHILE
+
+        //     YCSBProfiler.InsertTimePoint("after result set read");
         //     r.close();
         // }
+
+        for (int iter = 0; iter < iteration; ++iter) {
+            
+            YCSBProfiler.InsertTimePoint("begin create");
+            Statement stmt = conn.createStatement();
+            YCSBProfiler.InsertTimePoint("after create");
+
+            YCSBProfiler.InsertTimePoint("begin execute");
+            ResultSet r = stmt.executeQuery(readStmtStr + keyname);
+            YCSBProfiler.InsertTimePoint("after execute");
+
+            while(r.next()) {
+                for (int i = 0; i < YCSBConstants.NUM_FIELDS; i++)
+                    results[i] = r.getString(i+1);
+            } // WHILE
+            YCSBProfiler.InsertTimePoint("after result set read");
+            
+            r.close();
+        }
         
     }
 

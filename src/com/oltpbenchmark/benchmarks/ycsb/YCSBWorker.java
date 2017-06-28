@@ -34,6 +34,7 @@ import com.oltpbenchmark.distributions.CounterGenerator;
 import com.oltpbenchmark.distributions.ZipfianGenerator;
 import com.oltpbenchmark.types.TransactionStatus;
 import com.oltpbenchmark.util.TextGenerator;
+import com.oltpbenchmark.benchmarks.ycsb.YCSBProfiler;
 
 /**
  * YCSBWorker Implementation
@@ -57,7 +58,7 @@ public class YCSBWorker extends Worker<YCSBBenchmark> {
     private final ReadModifyWriteRecord procReadModifyWriteRecord;
     private final InsertRecord procInsertRecord;
     private final DeleteRecord procDeleteRecord;
-    
+
     public YCSBWorker(YCSBBenchmark benchmarkModule, int id, int init_record_count) {
         super(benchmarkModule, id);
         readRecord = new ZipfianGenerator(init_record_count);// pool for read keys
@@ -85,6 +86,10 @@ public class YCSBWorker extends Worker<YCSBBenchmark> {
     protected TransactionStatus executeWork(TransactionType nextTrans) throws UserAbortException, SQLException {
         Class<? extends Procedure> procClass = nextTrans.getProcedureClass();
         
+
+        YCSBProfiler.BeginTransaction();
+
+
         if (procClass.equals(DeleteRecord.class)) {
             deleteRecord();
         } else if (procClass.equals(InsertRecord.class)) {
@@ -98,7 +103,14 @@ public class YCSBWorker extends Worker<YCSBBenchmark> {
         } else if (procClass.equals(UpdateRecord.class)) {
             updateRecord();
         }
+
+        YCSBProfiler.InsertTimePoint("after read");
+
         conn.commit();
+
+        YCSBProfiler.EndTransaction();
+        
+
         return (TransactionStatus.SUCCESS);
     }
 
